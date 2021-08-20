@@ -251,11 +251,12 @@ namespace ConsoleGameEngine
             case PlatformID.Win32NT:
 #pragma warning disable CA1416
                Console.SetWindowSize(width, height);
-               Console.SetBufferSize(width, height);
+               Console.SetBufferSize(width, height); //this may or may not need to be removed or put above the line above.
 #pragma warning restore CA1416
                break;
             case PlatformID.Unix:
                system(@"printf '\e[8;" + width + @";" + height + @"t'");
+               //system($"printf \'\\e[8;{height};{width}t\\33c\\e[3J\'");
                break;
             case PlatformID.Other:
                break;

@@ -4,4 +4,8 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="ScreenBuffer.cs~RF13070e3.TMP" />
+  </ItemGroup>
+
 </Project>

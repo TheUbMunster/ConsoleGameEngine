@@ -31,6 +31,7 @@ namespace ConsoleGameEngine
       {
          CGEUtility.DisableConsoleMode(CGEUtility.DWInputMode.ENABLE_QUICK_EDIT_MODE, out _);
          CGEUtility.OrConsoleMode(CGEUtility.DWBufferMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING, out _);
+         Console.CursorVisible = false;
       }
       #endregion
 
