@@ -9,7 +9,7 @@ namespace ConsoleGameEngine
    public class ScreenBuffer
    {
       #region Fields
-      private SortedSet<Entity> entities;
+      private List<Entity> entities;
       public int Top { get; set; }
       public int Left { get; set; }
       public int Width { get; private set; }
@@ -19,7 +19,7 @@ namespace ConsoleGameEngine
       #region Ctor
       public ScreenBuffer(int top, int left, int width, int height)
       {
-         entities = new SortedSet<Entity>(new Entity.EntityZComparer());
+         entities = new List<Entity>();
          Top = top;
          Left = left;
          Width = width;
@@ -32,6 +32,7 @@ namespace ConsoleGameEngine
       {
          string borderForeColor = CGEUtility.GetColorANSIPrefix(255, 255, 255);
          string borderBackColor = CGEUtility.GetColorANSIPrefix(0, 0, 0, false);
+         entities.Sort(new Entity.EntityZComparer());
          foreach (Entity e in entities)
          {
             e.Draw();
@@ -44,21 +45,21 @@ namespace ConsoleGameEngine
                Console.SetCursorPosition(Left - 1, Top + i);
                if (i == -1)
                {
-                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charTopLeftCornerBorder
+                  Console.Write(WindowBuilder.charTopLeftCornerBorder
                      + new string(WindowBuilder.charHorizontalBorder, Width)
                      + WindowBuilder.charTopRightCornerBorder);
                }
                else if (i == Height)
                {
-                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charBottomLeftCornerBorder
+                  Console.Write(WindowBuilder.charBottomLeftCornerBorder
                      + new string(WindowBuilder.charHorizontalBorder, Width)
                      + WindowBuilder.charBottomRightCornerBorder);
                }
                else
                {
-                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charVerticalBorder);
+                  Console.Write(WindowBuilder.charVerticalBorder);
                   Console.SetCursorPosition(Left + Width, Top + i);
-                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charVerticalBorder);
+                  Console.Write(WindowBuilder.charVerticalBorder);
                }
             }
          }

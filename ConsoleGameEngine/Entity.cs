@@ -79,7 +79,7 @@ namespace ConsoleGameEngine
 
       public void Draw()
       {
-         const bool drawOrigin = true;
+         const bool drawOrigin = false;
          if (Dirty)
          {
             //draw
@@ -90,21 +90,22 @@ namespace ConsoleGameEngine
             for (int v = 0; v < Height; v++)
             {
                char establishedColor = ' ';
-               if (Top + v >= MyBuffer.Top - 1 && Top + v < MyBuffer.Top + MyBuffer.Height - 1)
+               if (Top + v >= 0 && Top + v < MyBuffer.Height)
                {
                   int sk = 0;
                   for (int w = 0; w < Width; w++)
                   {
                      //if (Left - (Width - 1) + w < MyBuffer.Left && Left - (Width - 1) + w >= MyBuffer.Left + (MyBuffer.Width - 1))
-                     if (Left + w < MyBuffer.Left - 1)
+                     if (Left + w < 0)
                      {
                         sk++;
                         continue;
                      }
-                     else if (Left + w >= MyBuffer.Left + MyBuffer.Width - 1)
+                     else if (Left + w >= MyBuffer.Width)
                      {
                         continue;
                      }
+#if DEBUG
                      if (drawOrigin)
                      {
                         if (v == 0 && w == 0)
@@ -113,6 +114,7 @@ namespace ConsoleGameEngine
                            continue;
                         }
                      }
+#endif
                      //TODO determine in the loop if we need to clip because we're outside of the screenbuffer.
                      if (establishedColor == Sprites.sprites[(int)myType][1, v][w])
                      {
