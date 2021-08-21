@@ -9,28 +9,91 @@ namespace ConsoleGameEngine
    public class ScreenBuffer
    {
       #region Fields
-      public SortedSet<Entity> entities;
+      private SortedSet<Entity> entities;
+      public int Top { get; set; }
+      public int Left { get; set; }
+      public int Width { get; private set; }
+      public int Height { get; private set; }
       #endregion
 
       #region Ctor
-      public ScreenBuffer()
+      public ScreenBuffer(int top, int left, int width, int height)
       {
          entities = new SortedSet<Entity>(new Entity.EntityZComparer());
+         Top = top;
+         Left = left;
+         Width = width;
+         Height = height;
       }
       #endregion
 
       #region Utility
-      public void Draw()
+      public void Draw(bool drawBorder = false)
       {
-         foreach(Entity e in entities)
+         string borderForeColor = CGEUtility.GetColorANSIPrefix(255, 255, 255);
+         string borderBackColor = CGEUtility.GetColorANSIPrefix(0, 0, 0, false);
+         foreach (Entity e in entities)
          {
             e.Draw();
          }
+         if (drawBorder)
+         {
+            Console.Write(borderForeColor + borderBackColor);
+            for (int i = -1; i < Height + 1; i++)
+            {
+               Console.SetCursorPosition(Left - 1, Top + i);
+               if (i == -1)
+               {
+                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charTopLeftCornerBorder
+                     + new string(WindowBuilder.charHorizontalBorder, Width)
+                     + WindowBuilder.charTopRightCornerBorder);
+               }
+               else if (i == Height)
+               {
+                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charBottomLeftCornerBorder
+                     + new string(WindowBuilder.charHorizontalBorder, Width)
+                     + WindowBuilder.charBottomRightCornerBorder);
+               }
+               else
+               {
+                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charVerticalBorder);
+                  Console.SetCursorPosition(Left + Width, Top + i);
+                  Console.Write(/*borderForeColor + borderBackColor + */WindowBuilder.charVerticalBorder);
+               }
+            }
+         }
       }
 
-      public void Redraw()
+      public void Redraw(bool drawBorder = false)
       {
+         foreach (Entity e in entities)
+         {
+            e.Dirty = true;
+         }
+         Draw(drawBorder);
+      }
 
+      public void AddEntity(Entity e)
+      {
+         //if (e.MyBuffer != null) TODO: DO THIS
+         //{
+         //   if (e.MyBuffer.entities.Contains(e))
+         //   {
+         //      //this entity is already in another buffer. Make sure to break before make.
+         //   }
+         //   else
+         //   {
+         //      //This entity's buffer isn't null, but it doesn't belong to that buffer. Something odd is going on.
+         //   }
+         //}
+         e.MyBuffer = this;
+         entities.Add(e);
+      }
+
+      public void RemoveEntity(Entity e)
+      {
+         e.MyBuffer = null;
+         entities.Remove(e);
       }
       #endregion
 

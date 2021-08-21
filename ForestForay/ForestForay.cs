@@ -1,5 +1,6 @@
 ﻿using System;
 using ConsoleGameEngine;
+using System.Threading;
 
 namespace ForestForay
 {
@@ -8,27 +9,70 @@ namespace ForestForay
       static void Main(string[] args)
       {
          CGE.Initialize();
-         //Console.WriteLine(CGEUtility.GetColorANSIPrefix(160, 20, 80) + "Hello World!");
-         //Console.SetCursorPosition(2, 0);
-         //Console.Write(CGEUtility.GetColorANSIPrefix(20, 20, 240) + "ll");
-         //Console.Read();
-         ScreenBuffer sb = new();
+
+         ScreenBuffer sb = new(1, 1, 50, 20);
          Entity e = new Entity(Entity.EntityType.PineTree, ' ');
-         e.Left = e.Width;
-         e.Top = e.Height;
-         sb.entities.Add(e);
-         sb.Draw();
-         Console.Read();
-         //for (int i = 0; i < 255; i += 4)
-         //{
-         //   for (int j = 0; j < 255; j += 4)
-         //   {
-         //      for (int k = 0; k < 255; k += 4)
-         //      {
-         //         Console.WriteLine(CGEUtility.GetColorANSIPrefix(i, j, k) + "Hello World!");
-         //      }
-         //   }
-         //}
+         sb.AddEntity(e);
+         sb.Draw(true);
+         MoveTreeRoutine(e);
+      }
+
+      static void MoveTreeRoutine(Entity e)
+      {
+         while (true)
+         {
+            bool esc = false;
+            if (Console.KeyAvailable)
+            {
+               switch(Console.ReadKey(true).Key)
+               {
+                  case ConsoleKey.W:
+                     e.MyBuffer.Top--;
+                     e.MyBuffer.Redraw(true);
+                     break;
+                  case ConsoleKey.S:
+                     e.MyBuffer.Top++;
+                     e.MyBuffer.Redraw(true);
+                     break;
+                  case ConsoleKey.A:
+                     e.MyBuffer.Left--;
+                     e.MyBuffer.Redraw(true);
+                     break;
+                  case ConsoleKey.D:
+                     e.MyBuffer.Left++;
+                     e.MyBuffer.Redraw(true);
+                     break;
+                  case ConsoleKey.UpArrow:
+                     e.Top--;
+                     e.Draw();
+                     break;
+                  case ConsoleKey.DownArrow:
+                     e.Top++;
+                     e.Draw();
+                     break;
+                  case ConsoleKey.LeftArrow:
+                     e.Left--;
+                     e.Draw();
+                     break;
+                  case ConsoleKey.RightArrow:
+                     e.Left++;
+                     e.Draw();
+                     break;
+                  case ConsoleKey.Escape:
+                     esc = true;
+                     break;
+               }
+               while(Console.KeyAvailable)
+               {
+                  Console.ReadKey(true); //consume additional characters.
+               }
+            }
+            if (esc)
+            {
+               break;
+            }
+            Thread.Sleep(100);
+         }
       }
    }
 }
