@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ConsoleGameEngine
 {
-   class ScreenBuffer
+   public class ScreenBuffer
    {
       #region Fields
-      private SortedSet<Entity> entities;
+      public SortedSet<Entity> entities;
       #endregion
 
       #region Ctor
@@ -22,7 +22,10 @@ namespace ConsoleGameEngine
       #region Utility
       public void Draw()
       {
-
+         foreach(Entity e in entities)
+         {
+            e.Draw();
+         }
       }
 
       public void Redraw()

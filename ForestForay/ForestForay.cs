@@ -8,9 +8,16 @@ namespace ForestForay
       static void Main(string[] args)
       {
          CGE.Initialize();
-         Console.WriteLine(CGEUtility.GetColorANSIPrefix(160, 20, 80) + "Hello World!");
-         Console.SetCursorPosition(2, 0);
-         Console.Write(CGEUtility.GetColorANSIPrefix(20, 20, 240) + "ll");
+         //Console.WriteLine(CGEUtility.GetColorANSIPrefix(160, 20, 80) + "Hello World!");
+         //Console.SetCursorPosition(2, 0);
+         //Console.Write(CGEUtility.GetColorANSIPrefix(20, 20, 240) + "ll");
+         //Console.Read();
+         ScreenBuffer sb = new();
+         Entity e = new Entity(Entity.EntityType.PineTree, ' ');
+         e.Left = e.Width;
+         e.Top = e.Height;
+         sb.entities.Add(e);
+         sb.Draw();
          Console.Read();
          //for (int i = 0; i < 255; i += 4)
          //{

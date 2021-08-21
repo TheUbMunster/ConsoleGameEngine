@@ -91,6 +91,50 @@ namespace ConsoleGameEngine
                @"   11111111   ",
             },
          },
+         new string [,]
+         {
+            {
+               @" \ | / ",
+               @"__\|/__",
+            },
+            {
+               @" t b B ",
+               @"bbtbBbb",
+            },
+            {
+               @" 11111 ",
+               @" 11111 ",
+            },
+            {
+               @"       ",
+               @"       ",
+            },
+         },
+      };
+
+      /// <summary>
+      /// Color ANSI string values for the individual sprites
+      /// </summary>
+      public static Dictionary<char, string>[] colorAliases =
+      {
+         new Dictionary<char, string>
+         {
+            { 'r', CGEUtility.GetColorANSIPrefix(232, 68, 46)},
+            { 'w', CGEUtility.GetColorANSIPrefix(235, 210, 197)},
+            { 'b', CGEUtility.GetColorANSIPrefix(46, 65, 158)}
+         },
+         new Dictionary<char, string>
+         {
+            { 'g', CGEUtility.GetColorANSIPrefix(42, 138, 37)},
+            { 'd', CGEUtility.GetColorANSIPrefix(18, 82, 15)},
+            { 'b', CGEUtility.GetColorANSIPrefix(82, 47, 15)}
+         },
+         new Dictionary<char, string>
+         {
+            { 't', CGEUtility.GetColorANSIPrefix(181, 142, 63)},
+            { 'b', CGEUtility.GetColorANSIPrefix(135, 102, 36)},
+            { 'B', CGEUtility.GetColorANSIPrefix(84, 62, 18)}
+         },
       };
    }
 }
