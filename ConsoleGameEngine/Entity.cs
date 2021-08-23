@@ -28,33 +28,57 @@ namespace ConsoleGameEngine
       }
       #endregion
 
-      public int Width { get => Sprites.sprites[(int)myType][0, 0].Length; }
-      public int Height { get => Sprites.sprites[(int)myType].GetLength(1); }
-      private int left;
-      public int Left
+      private CGEUtility.VectorInt2 position;
+      public CGEUtility.VectorInt2 Position
       {
-         get => left;
+         get => position;
          set
          {
-            if (value != left)
+            //erase trail, notify others that get dirty
+            if (value != position) //don't do anything if the value being assigned is the same value.
             {
-               //erase trail, notify others that get dirty
-               left = value;
-               Dirty = true;
+               CGEUtility.VectorInt2 temp = position;
+               position = value;
+               //erase (N/A if not in buffer)
+               if (MyBuffer != null)
+               {
+                  Console.Write(CGEUtility.GetColorANSIPrefix(0, 0, 0, false)); //bg (erase) color
+                  for (int v = 0; v < Height; v++)
+                  {
+                     for (int w = 0; w < Width; w++)
+                     {
+                        Console.SetCursorPosition(temp.Left + MyBuffer.Left, temp.Top + MyBuffer.Top + v);
+                        Console.Write(new string(' ', Width));
+                     }
+                  }
+                  Dirty = true;
+               }
+               //TODO: NOTIFY OTHERS THAT GET DIRTY
             }
          }
       }
-      private int top;
-      public int Top
+
+      public int Width { get => Sprites.sprites[(int)myType][0, 0].Length; }
+      public int Height { get => Sprites.sprites[(int)myType].GetLength(1); }
+      public int Left
       {
-         get => top;
+         get => Position.Left;
          set
          {
-            if (value != top)
+            if (value != Position.Left)
             {
-               //erase trail, notify others that get dirty
-               top = value;
-               Dirty = true;
+               Position = new CGEUtility.VectorInt2(value, Position.Top);
+            }
+         }
+      }
+      public int Top
+      {
+         get => Position.Top;
+         set
+         {
+            if (value != Position.Top)
+            {
+               Position = new CGEUtility.VectorInt2(Position.Left, value);
             }
          }
       }
