@@ -7,7 +7,7 @@ namespace ConsoleGameEngine
       #region Utility Methods
       /// <summary>
       /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="r">Red value (0-255)</param>
       /// <param name="g">Green value (0-255)</param>
@@ -21,7 +21,7 @@ namespace ConsoleGameEngine
 
       /// <summary>
       /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="r">Red value (0d-1d)</param>
       /// <param name="g">Green value (0d-1d)</param>
@@ -35,7 +35,7 @@ namespace ConsoleGameEngine
 
       /// <summary>
       /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="r">Red value (0f-1f)</param>
       /// <param name="g">Green value (0f-1f)</param>

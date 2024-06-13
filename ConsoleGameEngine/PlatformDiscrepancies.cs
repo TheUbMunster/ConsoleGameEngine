@@ -61,7 +61,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Sets the console modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Top region of page).
       /// Default mode is 0x0277.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want set.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -84,7 +84,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Or's the current console mode with the provided modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Top region of page).
       /// Default mode is 0x0277.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want to or into the current modes.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -115,7 +115,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Nots and ands the provided modes with the current console modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Top region of page).
       /// Default mode is 0x0277.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want to not/and into the current modes.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -146,7 +146,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Sets the console modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Bottom region of page).
       /// Default mode is 0x0003.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want set.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -169,7 +169,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Or's the current console mode with the provided modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Bottom region of page).
       /// Default mode is 0x0003.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want to or into the current modes.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -200,7 +200,7 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Nots and ands the provided modes with the current console modes. See <see href="https://docs.microsoft.com/en-us/windows/console/setconsolemode">here</see> for more info. (Bottom region of page).
       /// Default mode is 0x0003.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="modes">Bitwise-ord flags of the modes you want to not/and into the current modes.</param>
       /// <param name="error">True if an error occured, false otherwise.</param>
@@ -240,7 +240,7 @@ namespace ConsoleGameEngine
       #region Mixed
       /// <summary>
       /// Resizes the console/terminal on the screen.<br/><br/>
-      /// <b>Author: Samuel Gardner</b>
+      /// <b>Author: TheUbMunster</b>
       /// </summary>
       /// <param name="width">The new console/terminal width</param>
       /// <param name="height">The new console/terminal height</param>
