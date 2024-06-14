@@ -16,6 +16,7 @@ namespace ConsoleGameEngine
    /// </summary>
    public class ConsoleWindow
    {
+      #region Typedefs
       public enum WindowDrawType
       {
          Disabled = 0,
@@ -23,6 +24,8 @@ namespace ConsoleGameEngine
          EntityMode = 2,
          WindowMode = 4
       }
+      #endregion
+
       /// <summary>
       /// Flag field for what elements this window should display.
       /// 
@@ -68,21 +71,67 @@ namespace ConsoleGameEngine
 
       public FrameInfo Draw()
       {
-         char[,] chars = new char[Width, Height];
-         int[,] colorCodes = new int[Width, Height];
+         bool anyOutOfBounds = false;
+         char[,] chars = new char[Height, Width];
+         for (int i = 0; i < chars.GetLength(0); i++)
+            for (int j = 0; j < chars.GetLength(1); j++)
+               chars[i, j] = ' ';
+         int[,] colorCodes = new int[Height, Width];
+         HashSet<int> takenColorCodesLookupKeys = new HashSet<int>() { 0 };
          Dictionary<int, string> colorCodesLookup = new Dictionary<int, string>()
          { { 0, ConsoleUtil.GetColorANSIPrefix(255, 255, 255) } };
          //our sprites
          if ((DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
          {
+            //key: PersistenSpriteId, value: (key: old color code, value: new color code)
+            Dictionary<int, Dictionary<int, int>> spritesColorCodesRemappings = new();
             foreach (Entity e in Entities.OrderBy(x => x.ZOrder)) //small to big, so that big gets rendered last
             {
-               for (int x = 0; x < e.BackingSprite.Width; x++)
+               bool fullyOutOfBounds = e.Left >= Width || e.Left + e.BackingSprite.Width <= 0 ||
+                  e.Top >= Height || e.Top + e.BackingSprite.Height <= 0;
+               anyOutOfBounds |= fullyOutOfBounds;
+               if (!fullyOutOfBounds)
                {
-                  for (int y = 0; y < e.BackingSprite.Height; y++)
+                  if (e.BackingSprite.PersistentSpriteId.HasValue)
                   {
-                     chars[x + e.Left, y + e.Top] = e.BackingSprite.Chars[e.AnimationFrameIndex][x, y];
+                     if (!spritesColorCodesRemappings.ContainsKey(e.BackingSprite.PersistentSpriteId.Value))
+                        spritesColorCodesRemappings.Add(e.BackingSprite.PersistentSpriteId.Value, new());
+                     for (int oldKeyIndex = 0; oldKeyIndex < e.BackingSprite.ColorCodesLookup.Count; oldKeyIndex++)
+                     {
+                        int newKey = 0;
+                        while (takenColorCodesLookupKeys.Contains(newKey))
+                           newKey++;
+                        takenColorCodesLookupKeys.Add(newKey);
+                        spritesColorCodesRemappings[e.BackingSprite.PersistentSpriteId.Value].Add(e.BackingSprite.ColorCodesLookup.ElementAt(oldKeyIndex).Key, newKey);
+                     }
                   }
+                  else
+                  {
+                     throw new NotImplementedException();
+                  }
+                  for (int x = 0; x < e.BackingSprite.Width; x++)
+                  {
+                     for (int y = 0; y < e.BackingSprite.Height; y++)
+                     {
+                        int worldx = x + e.Left, worldy = y + e.Top;
+                        if (worldx >= 0 && worldy >= 0 && worldx < Width && worldy < Height)
+                        {
+                           if (e.BackingSprite.DisplayMask[e.AnimationFrameIndex][x, y])
+                           {
+                              chars[worldy, worldx] = e.BackingSprite.Chars[e.AnimationFrameIndex][x, y];
+                              colorCodes[worldy, worldx] = spritesColorCodesRemappings[e.BackingSprite.PersistentSpriteId.Value][e.BackingSprite.ColorCodes[e.AnimationFrameIndex][x, y]];
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+            for (int spriteRemaps = 0; spriteRemaps < spritesColorCodesRemappings.Count; spriteRemaps++)
+            {
+               var e = spritesColorCodesRemappings.ElementAt(spriteRemaps);
+               foreach (KeyValuePair<int, int> kvp in e.Value)
+               {
+                  colorCodesLookup.Add(kvp.Value, Sprite.PersistentSpriteTemplates[e.Key].ColorCodesLookup[kvp.Key]);
                }
             }
          }
@@ -101,6 +150,7 @@ namespace ConsoleGameEngine
             Chars = new NDLockableCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDLockableCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
+            //Meta = $"anyOutOfBounds: {anyOutOfBounds}"
          };
       }
    }
