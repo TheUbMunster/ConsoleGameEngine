@@ -8,7 +8,7 @@ Inspired by games like CASTLE from DOS, Candy Box, A Dark Room, and many others,
 * Animation
 * ANSI colors
 * Event callbacks (collision, offscreen)
-* Resizing window
+* Resizing window (TODO: viability/simplicity needs investigating)
 * Cross platform (Windows, Linux, MacOS)
 * Low-level input system
 * Diff-based screen updates (borderline necessary for older terminals)

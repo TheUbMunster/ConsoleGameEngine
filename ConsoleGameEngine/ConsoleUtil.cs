@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
-using static ConsoleGameEngine.CGE;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ConsoleGameEngine
 {
-   public static partial class CGEUtility
+   public static class ConsoleUtil
    {
       #region Typedefs
       public enum DWInputMode : uint
@@ -26,6 +29,33 @@ namespace ConsoleGameEngine
          ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004, //disabled by default
          DISABLE_NEWLINE_AUTO_RETURN = 0x0008, //disabled by default
          ENABLE_LVB_GRID_WORLDWIDE = 0x0010 //disabled by default
+      }
+      #endregion
+
+      #region Ctor
+      static ConsoleUtil()
+      {
+         EventHandler onExit = (_, _) => { OnApplicationQuit?.Invoke(); };
+         AppDomain.CurrentDomain.ProcessExit += onExit;
+         OnApplicationStart?.Invoke();
+      }
+      #endregion
+
+      #region Fields
+      public static PlatformID Platform { get; private set; } = Environment.OSVersion.Platform;
+
+      #region EngineEvents
+      public static event Action OnApplicationStart;
+      public static event Action OnApplicationQuit;
+      #endregion
+      #endregion
+
+      #region Initialize
+      public static void Initialize()
+      {
+         CGEUtility.DisableConsoleMode(CGEUtility.DWInputMode.ENABLE_QUICK_EDIT_MODE, out _);
+         CGEUtility.OrConsoleMode(CGEUtility.DWBufferMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING, out _);
+         Console.CursorVisible = false;
       }
       #endregion
 
@@ -261,6 +291,52 @@ namespace ConsoleGameEngine
             case PlatformID.Other:
                break;
          }
+      }
+      #endregion
+
+      #region Util
+      //TODO: fallback on ConsoleColor
+
+      /// <summary>
+      /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
+      /// <b>Author: TheUbMunster</b>
+      /// </summary>
+      /// <param name="r">Red value (0-255)</param>
+      /// <param name="g">Green value (0-255)</param>
+      /// <param name="b">Blue value (0-255)</param>
+      /// <param name="foreground">True if foreground color, false if background.</param>
+      /// <returns>ANSI code for coloring content in the console.</returns>
+      public static string GetColorANSIPrefix(byte r, byte g, byte b, bool foreground = true)
+      {
+         return $"\x1b[{(foreground ? 38 : 48)};2;{r};{g};{b}m";
+      }
+
+      /// <summary>
+      /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
+      /// <b>Author: TheUbMunster</b>
+      /// </summary>
+      /// <param name="r">Red value (0d-1d)</param>
+      /// <param name="g">Green value (0d-1d)</param>
+      /// <param name="b">Blue value (0d-1d)</param>
+      /// <param name="foreground">True if foreground color, false if background.</param>
+      /// <returns>ANSI code for coloring content in the console.</returns>
+      public static string GetColorANSIPrefix(double r, double g, double b, bool foreground = true)
+      {
+         return $"\x1b[{(foreground ? 38 : 48)};2;{(byte)(r * 255)};{(byte)(g * 255)};{(byte)(b * 255)}m";
+      }
+
+      /// <summary>
+      /// ENABLE_VIRTUAL_TERMINAL_PROCESSING must be enabled for this to function, compatible with Windows 10 version 1607 or greater.<br/><br/>
+      /// <b>Author: TheUbMunster</b>
+      /// </summary>
+      /// <param name="r">Red value (0f-1f)</param>
+      /// <param name="g">Green value (0f-1f)</param>
+      /// <param name="b">Blue value (0f-1f)</param>
+      /// <param name="foreground">True if foreground color, false if background.</param>
+      /// <returns>ANSI code for coloring content in the console.</returns>
+      public static string GetColorANSIPrefix(float r, float g, float b, bool foreground = true)
+      {
+         return $"\x1b[{(foreground ? 38 : 48)};2;{(byte)(r * 255)};{(byte)(g * 255)};{(byte)(b * 255)}m";
       }
       #endregion
    }

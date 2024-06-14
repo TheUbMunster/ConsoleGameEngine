@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleGameEngine
+namespace ConsoleGameEngine.old
 {
-   public static partial class Sprites
-   {
-      /// <summary>
-      /// First dimension is the individual sprites type (index of EntityType), second is the components of that sprite data e.g. graphical, color, collision, message, third is the individual rows of the selected data.
-      /// </summary>
-      public static string[][,] sprites = new string[][,]
-      {
+    public static partial class Sprites
+    {
+        /// <summary>
+        /// First dimension is the individual sprites type (index of EntityType), second is the components of that sprite data e.g. graphical, color, collision, message, third is the individual rows of the selected data.
+        /// </summary>
+        public static string[][,] sprites = new string[][,]
+        {
          new string [,]
          {
             {
@@ -110,13 +110,13 @@ namespace ConsoleGameEngine
                @"       ",
             },
          },
-      };
+        };
 
-      /// <summary>
-      /// Color ANSI string values for the individual sprites
-      /// </summary>
-      public static Dictionary<char, string>[] colorAliases =
-      {
+        /// <summary>
+        /// Color ANSI string values for the individual sprites
+        /// </summary>
+        public static Dictionary<char, string>[] colorAliases =
+        {
          new Dictionary<char, string>
          {
             { 'r', CGEUtility.GetColorANSIPrefix(232, 68, 46)},
@@ -136,5 +136,5 @@ namespace ConsoleGameEngine
             { 'B', CGEUtility.GetColorANSIPrefix(84, 62, 18)}
          },
       };
-   }
+    }
 }
