@@ -302,7 +302,7 @@ namespace ConsoleGameEngine
 #pragma warning restore CA1416
                break;
             case PlatformID.Unix:
-               system(@"printf '\e[8;" + width + @";" + height + @"t'");
+               system(@"printf '\e[8;" + height + @";" + width + @"t'");
                //system($"printf \'\\e[8;{height};{width}t\\33c\\e[3J\'");
                break;
             case PlatformID.Other:
