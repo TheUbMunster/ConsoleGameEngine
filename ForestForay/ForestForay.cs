@@ -8,6 +8,14 @@ namespace ForestForay
    {
       static void Main(string[] args)
       {
+         ConsoleUtil.Initialize();
+
+         ConsoleWindow cw = new(20, 20);
+         cw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode;
+         Renderer rend = new Renderer();
+         rend.SetRootConsoleWindow(cw);
+         cw.Entities.Add(new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Tree] });
+         rend.Draw();
          //CGE.Initialize();
 
          //ScreenBuffer sb = new(6, 8, 50, 20);

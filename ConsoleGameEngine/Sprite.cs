@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleGameEngine.DataStructures;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,10 +19,12 @@ namespace ConsoleGameEngine
 
       #region Fields
       public int? PersistentSpriteId { get; private init; } = null;
-      public IReadOnlyList<char[,]> Chars { get; init; }
-      public IReadOnlyList<int[,]> ColorCodes { get; init; }
-      public IReadOnlyList<bool[,]> DisplayMask { get; init; } //if any value is false, that "pixel" is treated like it's transparent.
+      public IReadOnlyList<NDLockableCollection<char>> Chars { get; init; }
+      public IReadOnlyList<NDLockableCollection<int>> ColorCodes { get; init; }
+      public IReadOnlyList<NDLockableCollection<bool>> DisplayMask { get; init; } //if any value is false, that "pixel" is treated like it's transparent.
       public IReadOnlyDictionary<int, string> ColorCodesLookup { get; init; }
+      public int Width { get => Chars[0].GetLength(0); }
+      public int Height { get => Chars[0].GetLength(1); }
       #endregion
 
       private Sprite() { }
@@ -29,10 +32,11 @@ namespace ConsoleGameEngine
       /// Any reference objects sent to this function should not be modified after the fact.
       /// </summary>
       /// <returns>A key to the <see cref="PersistentSpriteTemplates"/> collection.</returns>
-      public static int CreatePersistentSpriteTemplate(IReadOnlyList<char[,]> chars, IReadOnlyList<int[,]> colorCodes, IReadOnlyList<bool[,]> displayMask, IReadOnlyDictionary<int, string> colorCodesLookup)
+      public static int CreatePersistentSpriteTemplate(IReadOnlyList<NDLockableCollection<char>> chars, IReadOnlyList<NDLockableCollection<int>> colorCodes, IReadOnlyList<NDLockableCollection<bool>> displayMask, IReadOnlyDictionary<int, string> colorCodesLookup)
       {
          bool invalid = false;
-
+         if (chars.Count != colorCodes.Count || chars.Count != displayMask.Count)
+            invalid = true;
          if (invalid)
             throw new ArgumentException("Error: Invalid arguments when creating persistent sprite template. Likely mismatch in dimension of sprite data");
          Sprite s = new Sprite()

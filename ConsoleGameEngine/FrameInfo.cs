@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ConsoleGameEngine.DataStructures;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,10 @@ namespace ConsoleGameEngine
    /// </summary>
    public class FrameInfo
    {
-      public char[,] Chars { get; init; }
-      public int[,] ColorCodes { get; init; }
+      public int Width { get => Chars.GetLength(0); }
+      public int Height { get => Chars.GetLength(1); }
+      public NDLockableCollection<char> Chars { get; init; }
+      public NDLockableCollection<int> ColorCodes { get; init; }
       public IReadOnlyDictionary<int, string> ColorCodesLookup { get; init; }
    }
 }
