@@ -52,7 +52,12 @@ namespace ConsoleGameEngine
       #region Ctor
       static ConsoleUtil()
       {
-         EventHandler onExit = (_, _) => { OnApplicationQuit?.Invoke(); };
+         EventHandler onExit = (_, _) => 
+         {
+            OnApplicationQuit?.Invoke(); 
+            Console.CursorVisible = true;
+         };
+         Console.CancelKeyPress += (_, _) => { Console.CursorVisible = true; };
          AppDomain.CurrentDomain.ProcessExit += onExit;
          OnApplicationStart?.Invoke();
       }
@@ -70,8 +75,8 @@ namespace ConsoleGameEngine
       #region Initialize
       public static void Initialize()
       {
-         CGEUtility.DisableConsoleMode(CGEUtility.DWInputMode.ENABLE_QUICK_EDIT_MODE, out _);
-         CGEUtility.OrConsoleMode(CGEUtility.DWBufferMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING, out _);
+         DisableConsoleMode(DWInputMode.ENABLE_QUICK_EDIT_MODE, out _);
+         OrConsoleMode(DWBufferMode.ENABLE_VIRTUAL_TERMINAL_PROCESSING, out _);
          Console.CursorVisible = false;
       }
       #endregion
@@ -296,9 +301,13 @@ namespace ConsoleGameEngine
          switch (Platform)
          {
             case PlatformID.Win32NT:
-               Console.SetWindowSize(width, height);
-               Console.SetBufferSize(width, height); //this may or may not need to be removed or put above the line above.
 #pragma warning disable CA1416
+               //Windows terminal doesn't let you set window or buffer size for some reason.
+               //https://github.com/microsoft/terminal/issues/5094
+
+               //Console.SetWindowSize(width, height);
+               //Console.SetBufferSize(width, height); //this may or may not need to be removed or put above the line above.
+               //Console.Write(@"\e[8;" + height + @";" + width + @"t");
 #pragma warning restore CA1416
                break;
             case PlatformID.Unix:

@@ -25,6 +25,11 @@ namespace ConsoleGameEngine
          //then we draw that info to the console
          //make it so that "info" is only the "diff" between the previous screen and this one so that we don't waste compute
          //especially since old-style terminals seek() functions are so freaking slow.
+
+         //ideas for speed:
+         //quadtree diff?
+
+
          int top = (Console.BufferHeight - rootWindow.Height) / 2, left = (Console.BufferWidth - rootWindow.Width) / 2;
          for (int x = 0; x < info.Width; x++)
          {
