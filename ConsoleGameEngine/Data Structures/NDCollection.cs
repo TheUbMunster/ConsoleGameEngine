@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ConsoleGameEngine.DataStructures
 {
-   public class NDLockableCollection<T>
+   public class NDCollection<T>
    {
-      //TODO: n-dimension read only collection.
+      //TODO: n-dimension read only collection.?
       private T[] flatData;
       private int[] lengths;
-      public bool Locked { get; private set; } = false;
-      public NDLockableCollection(IEnumerable<T> flattenedData, params int[] lengths) : this(flattenedData.ToList(), lengths) { }
-      public NDLockableCollection(IReadOnlyList<T> flattenedData, params int[] lengths) 
+      //public bool Locked { get; private set; } = false;
+      public NDCollection(IEnumerable<T> flattenedData, params int[] lengths) : this(flattenedData.ToList(), lengths) { }
+      public NDCollection(IReadOnlyList<T> flattenedData, params int[] lengths) 
       {
          flatData = flattenedData.ToArray();
          this.lengths = lengths;
@@ -23,10 +23,10 @@ namespace ConsoleGameEngine.DataStructures
          get => flatData[FlattenIndex(indeces)];
          set
          {
-            if (!Locked)
+            //if (!Locked)
                flatData[FlattenIndex(indeces)] = value;
-            else
-               throw new InvalidOperationException("Tried to modify a locked NDLockableCollection.");
+            //else
+            //   throw new InvalidOperationException("Tried to modify a locked NDLockableCollection.");
          }
       }
       //generalization of
@@ -45,6 +45,6 @@ namespace ConsoleGameEngine.DataStructures
       }
       public int GetLength(int dimension) => lengths[dimension];
       public int DimensionCount() => lengths.Length;
-      public void Lock() => Locked = true;
+      //public void Lock() => Locked = true;
    }
 }

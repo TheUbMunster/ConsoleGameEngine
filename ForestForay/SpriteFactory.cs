@@ -11,7 +11,7 @@ namespace ForestForay
    public static class SpriteFactory
    {
       public static readonly int Tree = Sprite.CreatePersistentSpriteTemplate(
-         new List<NDLockableCollection<char>> { new NDLockableCollection<char>(
+         new List<NDCollection<char>> { new NDCollection<char>(
                @"      /\      ".Concat(
                @"     /\\\     ").Concat(
                @"    /\/\\\    ").Concat(
@@ -23,7 +23,7 @@ namespace ForestForay
                @"/\///\/\\\\\/\").Concat(
                @"      ||      "),
             14, 10) },
-         new List<NDLockableCollection<int>> { new NDLockableCollection<int>(
+         new List<NDCollection<int>> { new NDCollection<int>(
                new List<int> {
                0,0,0,0,0,0,1,2,0,0,0,0,0,0,
                0,0,0,0,0,1,2,2,2,0,0,0,0,0,
@@ -36,7 +36,7 @@ namespace ForestForay
                1,2,1,1,1,2,1,2,2,2,2,2,1,2,
                0,0,0,0,0,0,3,3,0,0,0,0,0,0, },
             14, 10) },
-         new List<NDLockableCollection<bool>> { new NDLockableCollection<bool>(
+         new List<NDCollection<bool>> { new NDCollection<bool>(
                new List<bool> { 
                false,false,false,false,false,false,true, true, false,false,false,false,false,false,
                false,false,false,false,false,true, true, true, true, false,false,false,false,false,
@@ -52,9 +52,34 @@ namespace ForestForay
          new Dictionary<int, string>
          {
             { 0, "error" }, //the mask should prevent "0" from ever being accessed.
-            { 1, CGEUtility.GetColorANSIPrefix(42, 138, 37) },
-            { 2, CGEUtility.GetColorANSIPrefix(18, 82, 15) },
-            { 3, CGEUtility.GetColorANSIPrefix(82, 47, 15) },
+            { 1, ConsoleUtil.GetColorANSIPrefix(42, 138, 37) },
+            { 2, ConsoleUtil.GetColorANSIPrefix(18, 82, 15) },
+            { 3, ConsoleUtil.GetColorANSIPrefix(82, 47, 15) },
+         });
+      public static readonly int Player = Sprite.CreatePersistentSpriteTemplate(
+         new List<NDCollection<char>> { new NDCollection<char>(
+               @"_o_".Concat(
+               @" | ").Concat(
+               @"/ \"),
+            3, 3) },
+         new List<NDCollection<int>> { new NDCollection<int>(
+               new List<int> {
+               1,2,1,
+               0,1,0,
+               3,0,3, },
+            3, 3) },
+         new List<NDCollection<bool>> { new NDCollection<bool>(
+               new List<bool> { 
+               true, true, true,
+               false,true, false,
+               true, false,true, },
+            3, 3) },
+         new Dictionary<int, string>
+         {
+            { 0, "error" }, //the mask should prevent "0" from ever being accessed.
+            { 1, ConsoleUtil.GetColorANSIPrefix(232, 68, 46) },
+            { 2, ConsoleUtil.GetColorANSIPrefix(235, 210, 197) },
+            { 3, ConsoleUtil.GetColorANSIPrefix(46, 65, 158) },
          });
    }
 }

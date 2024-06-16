@@ -138,7 +138,71 @@ namespace ConsoleGameEngine
          //our child console windows
          if ((DrawType & WindowDrawType.WindowMode) != WindowDrawType.Disabled)
          {
-
+            foreach (ConsoleWindow ccw in ChildConsoleWindows.OrderBy(x => x.ZOrder))
+            {
+               bool fullyOutOfBounds = ccw.Left >= Width || ccw.Left + ccw.Width <= 0 ||
+                  ccw.Top >= Height || ccw.Top + ccw.Height <= 0;
+               anyOutOfBounds |= fullyOutOfBounds;
+               if (!fullyOutOfBounds)
+               {
+                  FrameInfo ccfi = ccw.Draw();
+                  for (int x = -1, bx = ccw.Width + 1; x < bx; x++)
+                  {
+                     for (int y = -1, by = ccw.Height + 1; y < by; y++)
+                     {
+                        int worldx = x + ccw.Left, worldy = y + ccw.Top;
+                        if (worldx >= 0 && worldx < Width && worldy >= 0 && worldy < Height)
+                        {
+                           if (x >= 0 && x < ccfi.Width && y >= 0 && y < ccfi.Height)
+                              chars[worldy, worldx] = ccfi.Chars[x, y];
+                           if (x == -1 && y == -1) //top left corner
+                              chars[worldy, worldx] = ConsoleUtil.charTopLeftCornerBorder;
+                           else if (x == -1 && y == by - 1) //bottom left corner
+                              chars[worldy, worldx] = ConsoleUtil.charBottomLeftCornerBorder;
+                           else if (x == bx - 1 && y == -1) //top right corner
+                              chars[worldy, worldx] = ConsoleUtil.charTopRightCornerBorder;
+                           else if (x == bx - 1 && y == by - 1) //bottom right corner
+                              chars[worldy, worldx] = ConsoleUtil.charBottomRightCornerBorder;
+                           else if ((y == -1 || y == by - 1) && (x > -1 && x < bx - 1)) //horiz edges
+                           {
+                              if (x < ccfi.Meta.Length)
+                                 chars[worldy, worldx] = ccfi.Meta[x]; //- 1 because the very first horiz edge starts at x=1
+                              else
+                                 chars[worldy, worldx] = ConsoleUtil.charHorizontalBorder;
+                           }
+                           else if ((x == -1 || x == bx - 1) && (y > -1 && y < by - 1)) //vert edges
+                              chars[worldy, worldx] = ConsoleUtil.charVerticalBorder;
+                        }
+                     }
+                  }
+                  //string white = ConsoleUtil.GetColorANSIPrefix(255, 255, 255);
+                  //for (int x = 0, bx = ccw.Width + 2; x < bx; x++)
+                  //{
+                  //   for (int y = 0, by = ccw.Height + 2; y < by; y++)
+                  //   {
+                  //      int screenx = x + ccw.Left - 1, screeny = y + ccw.Top - 1;
+                  //      Console.SetCursorPosition(screenx, screeny);
+                  //      if (x == 0 && y == 0) //top left corner
+                  //         Console.Write(white + ConsoleUtil.charTopLeftCornerBorder);
+                  //      else if (x == 0 && y == by - 1) //bottom left corner
+                  //         Console.Write(white + ConsoleUtil.charBottomLeftCornerBorder);
+                  //      else if (x == bx - 1 && y == 0) //top right corner
+                  //         Console.Write(white + ConsoleUtil.charTopRightCornerBorder);
+                  //      else if (x == bx - 1 && y == by - 1) //bottom right corner
+                  //         Console.Write(white + ConsoleUtil.charBottomRightCornerBorder);
+                  //      else if ((y == 0 || y == by - 1) && (x > 0 && x < bx)) //horiz edges
+                  //      {
+                  //         if (x - 1 < ccfi.Meta.Length)
+                  //            Console.Write(white + ccfi.Meta[x - 1]); //- 1 because the very first horiz edge starts at x=1
+                  //         else
+                  //            Console.Write(white + ConsoleUtil.charHorizontalBorder);
+                  //      }
+                  //      else if ((x == 0 || x == bx - 1) && (y > 0 && y < by)) //vert edges
+                  //         Console.Write(white + ConsoleUtil.charVerticalBorder);
+                  //   }
+                  //}
+               }
+            }
          }
          //our text
          if ((DrawType & WindowDrawType.TextMode) != WindowDrawType.Disabled)
@@ -147,8 +211,8 @@ namespace ConsoleGameEngine
          }
          return new FrameInfo() 
          {
-            Chars = new NDLockableCollection<char>(chars.Cast<char>(), Width, Height),
-            ColorCodes = new NDLockableCollection<int>(colorCodes.Cast<int>(), Width, Height),
+            Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
+            ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
             //Meta = $"anyOutOfBounds: {anyOutOfBounds}"
          };
