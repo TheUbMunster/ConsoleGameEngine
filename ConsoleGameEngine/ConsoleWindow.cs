@@ -77,14 +77,12 @@ namespace ConsoleGameEngine
             for (int j = 0; j < chars.GetLength(1); j++)
                chars[i, j] = ' ';
          int[,] colorCodes = new int[Height, Width];
-         HashSet<int> takenColorCodesLookupKeys = new HashSet<int>() { 0 };
+         //HashSet<int> takenColorCodesLookupKeys = new HashSet<int>() { 0 };
          Dictionary<int, string> colorCodesLookup = new Dictionary<int, string>()
          { { 0, ConsoleUtil.GetColorANSIPrefix(255, 255, 255) } };
          //our sprites
          if ((DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
          {
-            //key: PersistenSpriteId, value: (key: old color code, value: new color code)
-            Dictionary<int, Dictionary<int, int>> spritesColorCodesRemappings = new();
             foreach (Entity e in Entities.OrderBy(x => x.ZOrder)) //small to big, so that big gets rendered last
             {
                bool fullyOutOfBounds = e.Left >= Width || e.Left + e.BackingSprite.Width <= 0 ||
@@ -92,22 +90,14 @@ namespace ConsoleGameEngine
                anyOutOfBounds |= fullyOutOfBounds;
                if (!fullyOutOfBounds)
                {
-                  if (e.BackingSprite.PersistentSpriteId.HasValue)
+                  int newKey = colorCodesLookup.Count;
+                  //key: old color code, value: new color code
+                  Dictionary<int, int> colorCodesRemappings = new();
+                  foreach (KeyValuePair<int, string> lookup in e.BackingSprite.ColorCodesLookup)
                   {
-                     if (!spritesColorCodesRemappings.ContainsKey(e.BackingSprite.PersistentSpriteId.Value))
-                        spritesColorCodesRemappings.Add(e.BackingSprite.PersistentSpriteId.Value, new());
-                     for (int oldKeyIndex = 0; oldKeyIndex < e.BackingSprite.ColorCodesLookup.Count; oldKeyIndex++)
-                     {
-                        int newKey = 0;
-                        while (takenColorCodesLookupKeys.Contains(newKey))
-                           newKey++;
-                        takenColorCodesLookupKeys.Add(newKey);
-                        spritesColorCodesRemappings[e.BackingSprite.PersistentSpriteId.Value].Add(e.BackingSprite.ColorCodesLookup.ElementAt(oldKeyIndex).Key, newKey);
-                     }
-                  }
-                  else
-                  {
-                     throw new NotImplementedException();
+                     colorCodesRemappings.Add(lookup.Key, newKey);
+                     colorCodesLookup.Add(newKey, lookup.Value);
+                     newKey++;
                   }
                   for (int x = 0; x < e.BackingSprite.Width; x++)
                   {
@@ -119,19 +109,11 @@ namespace ConsoleGameEngine
                            if (e.BackingSprite.DisplayMask[e.AnimationFrameIndex][x, y])
                            {
                               chars[worldy, worldx] = e.BackingSprite.Chars[e.AnimationFrameIndex][x, y];
-                              colorCodes[worldy, worldx] = spritesColorCodesRemappings[e.BackingSprite.PersistentSpriteId.Value][e.BackingSprite.ColorCodes[e.AnimationFrameIndex][x, y]];
+                              colorCodes[worldy, worldx] = colorCodesRemappings[e.BackingSprite.ColorCodes[e.AnimationFrameIndex][x, y]];
                            }
                         }
                      }
                   }
-               }
-            }
-            for (int spriteRemaps = 0; spriteRemaps < spritesColorCodesRemappings.Count; spriteRemaps++)
-            {
-               var e = spritesColorCodesRemappings.ElementAt(spriteRemaps);
-               foreach (KeyValuePair<int, int> kvp in e.Value)
-               {
-                  colorCodesLookup.Add(kvp.Value, Sprite.PersistentSpriteTemplates[e.Key].ColorCodesLookup[kvp.Key]);
                }
             }
          }
@@ -146,6 +128,15 @@ namespace ConsoleGameEngine
                if (!fullyOutOfBounds)
                {
                   FrameInfo ccfi = ccw.Draw();
+                  int newKey = colorCodesLookup.Count;
+                  //key: old color code, value: new color code
+                  Dictionary<int, int> colorCodesRemappings = new();
+                  foreach (KeyValuePair<int, string> lookup in ccfi.ColorCodesLookup)
+                  {
+                     colorCodesRemappings.Add(lookup.Key, newKey);
+                     colorCodesLookup.Add(newKey, lookup.Value);
+                     newKey++;
+                  }
                   for (int x = -1, bx = ccw.Width + 1; x < bx; x++)
                   {
                      for (int y = -1, by = ccw.Height + 1; y < by; y++)
@@ -153,8 +144,12 @@ namespace ConsoleGameEngine
                         int worldx = x + ccw.Left, worldy = y + ccw.Top;
                         if (worldx >= 0 && worldx < Width && worldy >= 0 && worldy < Height)
                         {
+                           colorCodes[worldy, worldx] = 0; //white by default, (should apply to borders).
                            if (x >= 0 && x < ccfi.Width && y >= 0 && y < ccfi.Height)
+                           {
                               chars[worldy, worldx] = ccfi.Chars[x, y];
+                              colorCodes[worldy, worldx] = colorCodesRemappings[ccfi.ColorCodes[x, y]];
+                           }
                            if (x == -1 && y == -1) //top left corner
                               chars[worldy, worldx] = ConsoleUtil.charTopLeftCornerBorder;
                            else if (x == -1 && y == by - 1) //bottom left corner
@@ -175,32 +170,6 @@ namespace ConsoleGameEngine
                         }
                      }
                   }
-                  //string white = ConsoleUtil.GetColorANSIPrefix(255, 255, 255);
-                  //for (int x = 0, bx = ccw.Width + 2; x < bx; x++)
-                  //{
-                  //   for (int y = 0, by = ccw.Height + 2; y < by; y++)
-                  //   {
-                  //      int screenx = x + ccw.Left - 1, screeny = y + ccw.Top - 1;
-                  //      Console.SetCursorPosition(screenx, screeny);
-                  //      if (x == 0 && y == 0) //top left corner
-                  //         Console.Write(white + ConsoleUtil.charTopLeftCornerBorder);
-                  //      else if (x == 0 && y == by - 1) //bottom left corner
-                  //         Console.Write(white + ConsoleUtil.charBottomLeftCornerBorder);
-                  //      else if (x == bx - 1 && y == 0) //top right corner
-                  //         Console.Write(white + ConsoleUtil.charTopRightCornerBorder);
-                  //      else if (x == bx - 1 && y == by - 1) //bottom right corner
-                  //         Console.Write(white + ConsoleUtil.charBottomRightCornerBorder);
-                  //      else if ((y == 0 || y == by - 1) && (x > 0 && x < bx)) //horiz edges
-                  //      {
-                  //         if (x - 1 < ccfi.Meta.Length)
-                  //            Console.Write(white + ccfi.Meta[x - 1]); //- 1 because the very first horiz edge starts at x=1
-                  //         else
-                  //            Console.Write(white + ConsoleUtil.charHorizontalBorder);
-                  //      }
-                  //      else if ((x == 0 || x == bx - 1) && (y > 0 && y < by)) //vert edges
-                  //         Console.Write(white + ConsoleUtil.charVerticalBorder);
-                  //   }
-                  //}
                }
             }
          }
