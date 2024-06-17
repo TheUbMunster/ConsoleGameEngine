@@ -10,7 +10,7 @@ namespace ForestForay
       {
          ConsoleUtil.Initialize();
 
-         ConsoleWindow mainCw = new(60, 20);
+         ConsoleWindow mainCw = new(80, 25);
          mainCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode | ConsoleWindow.WindowDrawType.WindowMode;
 
          ConsoleWindow subCw = new ConsoleWindow(12, 5);
@@ -23,6 +23,8 @@ namespace ForestForay
 
          Entity tree = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Tree] };
          mainCw.Entities.Add(tree);
+         Entity shrub = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Shrub], Left = 10 };
+         mainCw.Entities.Add(shrub);
 
          Entity player = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Player] };
          subCw.Entities.Add(player);
@@ -37,15 +39,19 @@ namespace ForestForay
                {
                   case ConsoleKey.W:
                      tree.Top--;
+                     shrub.Top--;
                      break;
                   case ConsoleKey.S:
                      tree.Top++;
+                     shrub.Top++;
                      break;
                   case ConsoleKey.A:
                      tree.Left--;
+                     shrub.Left--;
                      break;
                   case ConsoleKey.D:
                      tree.Left++;
+                     shrub.Left++;
                      break;
 
                   case ConsoleKey.UpArrow:

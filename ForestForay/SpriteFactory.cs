@@ -81,5 +81,27 @@ namespace ForestForay
             { 2, ConsoleUtil.GetColorANSIPrefix(235, 210, 197) },
             { 3, ConsoleUtil.GetColorANSIPrefix(46, 65, 158) },
          });
+      public static readonly int Shrub = Sprite.CreatePersistentSpriteTemplate(
+         new List<NDCollection<char>> { new NDCollection<char>(
+               @" \ | / ".Concat(
+               @"__\|/__"),
+            7, 2) },
+         new List<NDCollection<int>> { new NDCollection<int>(
+               new List<int> {
+               0,1,0,2,0,3,0,
+               2,2,1,2,3,2,2 },
+            7, 2) },
+         new List<NDCollection<bool>> { new NDCollection<bool>(
+               new List<bool> {
+               false,true, false,true, false,true, false,
+               true, true, true, true, true, true, true, },
+            7, 2) },
+         new Dictionary<int, string>
+         {
+            { 0, "error" }, //the mask should prevent "0" from ever being accessed.
+            { 1, ConsoleUtil.GetColorANSIPrefix(181, 142, 63) },
+            { 2, ConsoleUtil.GetColorANSIPrefix(135, 102, 36) },
+            { 3, ConsoleUtil.GetColorANSIPrefix(84, 62, 18) },
+         });
    }
 }

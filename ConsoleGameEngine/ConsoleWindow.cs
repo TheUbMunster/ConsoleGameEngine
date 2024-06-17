@@ -20,9 +20,10 @@ namespace ConsoleGameEngine
       public enum WindowDrawType
       {
          Disabled = 0,
-         TextMode = 1,
-         EntityMode = 2,
-         WindowMode = 4
+         EntityMode = 1,
+         WindowMode = 2,
+         MenuMode = 4,
+         TextMode = 8, //"raw" control
       }
       #endregion
 
@@ -71,7 +72,7 @@ namespace ConsoleGameEngine
 
       public FrameInfo Draw()
       {
-         bool anyOutOfBounds = false;
+         int cullCount = 0;
          char[,] chars = new char[Height, Width];
          for (int i = 0; i < chars.GetLength(0); i++)
             for (int j = 0; j < chars.GetLength(1); j++)
@@ -87,7 +88,7 @@ namespace ConsoleGameEngine
             {
                bool fullyOutOfBounds = e.Left >= Width || e.Left + e.BackingSprite.Width <= 0 ||
                   e.Top >= Height || e.Top + e.BackingSprite.Height <= 0;
-               anyOutOfBounds |= fullyOutOfBounds;
+               cullCount += fullyOutOfBounds ? 1 : 0;
                if (!fullyOutOfBounds)
                {
                   int newKey = colorCodesLookup.Count;
@@ -124,7 +125,7 @@ namespace ConsoleGameEngine
             {
                bool fullyOutOfBounds = ccw.Left >= Width || ccw.Left + ccw.Width <= 0 ||
                   ccw.Top >= Height || ccw.Top + ccw.Height <= 0;
-               anyOutOfBounds |= fullyOutOfBounds;
+               cullCount += fullyOutOfBounds ? 1 : 0;
                if (!fullyOutOfBounds)
                {
                   FrameInfo ccfi = ccw.Draw();
@@ -173,6 +174,11 @@ namespace ConsoleGameEngine
                }
             }
          }
+         //menu entries mode
+         if ((DrawType & WindowDrawType.MenuMode) != WindowDrawType.Disabled)
+         {
+
+         }
          //our text
          if ((DrawType & WindowDrawType.TextMode) != WindowDrawType.Disabled)
          {
@@ -183,7 +189,7 @@ namespace ConsoleGameEngine
             Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
-            //Meta = $"anyOutOfBounds: {anyOutOfBounds}"
+            Meta = $"cull: {cullCount}"
          };
       }
    }
