@@ -65,29 +65,52 @@ namespace ConsoleGameEngine
             Console.Write(sb.ToString());
          }
          string white = ConsoleUtil.GetColorANSIPrefix(255, 255, 255);
+         /*
+          With this double for loop only setting the cursor position when absolutely necessary:
+
+          22% of CPU time is spent PURELY on Console.SetCursorPosition
+          18% of CPU time is spent PURELY on Console.Write
+
+          These percentages include the time spent on SetCursorPosition and Write from the above code too.
+          */
          for (int x = 0, bx = info.Width + 2; x < bx; x++)
          {
             for (int y = 0, by = info.Height + 2; y < by; y++)
             {
                int screenx = x + left - 1, screeny = y + top - 1;
-               Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                if (x == 0 && y == 0) //top left corner
+               {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   Console.Write(white + ConsoleUtil.charTopLeftCornerBorder);
+               }
                else if (x == 0 && y == by - 1) //bottom left corner
+               {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   Console.Write(white + ConsoleUtil.charBottomLeftCornerBorder);
+               }
                else if (x == bx - 1 && y == 0) //top right corner
+               {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   Console.Write(white + ConsoleUtil.charTopRightCornerBorder);
+               }
                else if (x == bx - 1 && y == by - 1) //bottom right corner
+               {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   Console.Write(white + ConsoleUtil.charBottomRightCornerBorder);
+               }
                else if ((y == 0 || y == by - 1) && (x > 0 && x < bx)) //horiz edges
                {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   if (x - 1 < info.Meta.Length)
                      Console.Write(white + info.Meta[x - 1]); //- 1 because the very first horiz edge starts at x=1
                   else
                      Console.Write(white + ConsoleUtil.charHorizontalBorder);
                }
                else if ((x == 0 || x == bx - 1) && (y > 0 && y < by)) //vert edges
+               {
+                  Console.SetCursorPosition(screenx, screeny); //this only needs to execute *if* we draw.
                   Console.Write(white + ConsoleUtil.charVerticalBorder);
+               }
             }
          }
          lastFrameInfo = info;
