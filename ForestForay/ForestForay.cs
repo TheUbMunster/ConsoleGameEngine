@@ -40,31 +40,39 @@ namespace ForestForay
                   case ConsoleKey.W:
                      tree.Top--;
                      shrub.Top--;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.S:
                      tree.Top++;
                      shrub.Top++;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.A:
                      tree.Left--;
                      shrub.Left--;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.D:
                      tree.Left++;
                      shrub.Left++;
+                     mainCw.IsDirty = true;
                      break;
 
                   case ConsoleKey.UpArrow:
                      player.Top--;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.DownArrow:
                      player.Top++;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.LeftArrow:
                      player.Left--;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.RightArrow:
                      player.Left++;
+                     subCw.IsDirty = true;
                      break;
 
                   case ConsoleKey.Escape:

@@ -34,29 +34,33 @@ namespace ConsoleGameEngine
       /// 
       /// Note: TextMode content will always be drawn on top.
       /// </summary>
-      public WindowDrawType DrawType { get; set; } 
+      public WindowDrawType DrawType { get; set; } //when change drawmode, set this window dirty
       /// <summary>
       /// How many columns to the right is this window relative to the left edge of the parent window.
       /// </summary>
-      public int Left { get; set; }
+      public int Left { get; set; } //set parent window dirty
       /// <summary>
       /// How many rows to the bottom is this window relative to the top edge of the parent window.
       /// </summary>
-      public int Top { get; set; }
+      public int Top { get; set; } //set parent window dirty
       /// <summary>
       /// What order this drawable element is drawn in. High values get drawn on top, low values on bottom.
       /// </summary>
-      public int ZOrder { get; set; }
+      public int ZOrder { get; set; } //set parent window dirty
       public int Width { get; }
       public int Height { get; }
-      public List<Entity> Entities { get; } = new List<Entity>();
+      public List<Entity> Entities { get; } = new List<Entity>(); //when add/remove set this window dirty if WindowDrawType is EntityMode
       /// <summary>
       /// All child console windows are implicitly drawn on top of this one. ZOrder is only compared between children to determine draw order.
       /// </summary>
-      public List<ConsoleWindow> ChildConsoleWindows { get; } = new List<ConsoleWindow>();
-      public IReadOnlyList<char[,]> Chars { get; init; }
-      public IReadOnlyList<int[,]> ColorCodes { get; init; }
-      public IReadOnlyDictionary<int, string> ColorCodesLookup { get; init; }
+      public List<ConsoleWindow> ChildConsoleWindows { get; } = new List<ConsoleWindow>(); //when add/remove set this window dirty if WindowDrawType is WindowMode
+      public NDCollection<char> RawChars { get; init; } //when modify set this window dirty if WindowDrawType is textmode
+      public NDCollection<int> RawColorCodes { get; init; } //when modify set this window dirty if WindowDrawType is textmode
+      public NDCollection<bool> RawDisplayMask { get; init; } //when modify set this window dirty if WindowDrawType is textmode
+      public Dictionary<int, string> RawColorCodesLookup { get; init; } //when modify set this window dirty if WindowDrawType is textmode
+      public bool IsDirty { get; set; } = true;
+
+      private FrameInfo lastFrameInfo = null;
       /// <summary>
       /// Creates a ConsoleWindow with the specified width and height.
       /// 
@@ -72,6 +76,8 @@ namespace ConsoleGameEngine
 
       public FrameInfo Draw()
       {
+         if (!IsDirty && lastFrameInfo != null)
+            return lastFrameInfo;
          int cullCount = 0;
          char[,] chars = new char[Height, Width];
          for (int i = 0; i < chars.GetLength(0); i++)
@@ -177,14 +183,16 @@ namespace ConsoleGameEngine
          //menu entries mode
          if ((DrawType & WindowDrawType.MenuMode) != WindowDrawType.Disabled)
          {
-
+            //todo
+            //maybe instead of menumode, we can just make some helper functions to make making menus in text mode easy.
          }
          //our text
          if ((DrawType & WindowDrawType.TextMode) != WindowDrawType.Disabled)
          {
 
          }
-         return new FrameInfo() 
+         IsDirty = false;
+         return lastFrameInfo = new FrameInfo() 
          {
             Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
