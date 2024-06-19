@@ -9,19 +9,6 @@ namespace ConsoleGameEngine
 {
    public class Entity
    {
-      /// <summary>
-      /// For indeces i and j, whenever an entity of physics layer i collides with an entity of physics layer j, the
-      /// "OnCollision" Event will be raised if physicsLayersInteractions[i, j] is true.
-      /// 
-      /// Within the "OnCollision" event, you can check e.g., if either entity is the "player", and if so, roll back their
-      /// movement so they're no longer colliding with what they hit.
-      /// </summary>
-      public static bool[,] physicsLayersInteractions = new bool[13, 13]; //n x n
-      public static event Action<Entity, Entity> OnCollision;
-
-
-
-
       private long ctorTime = DateTime.Now.Ticks;
       private int animationFrameOffset = 0;
       private float? animationRate = null;
@@ -72,6 +59,13 @@ namespace ConsoleGameEngine
       /// <summary>
       /// Note that not all of the collision mask must belong to the same physics layer. Some of it may belong
       /// to a solid collision layer, while another portion of it may be a "trigger" physics layer to (e.g., open a door).
+      /// 
+      /// What layer is considered to be collision/trigger/whatever is up to the implementer.
+      /// 
+      /// Negative entries in the CollisionMask are considered to be the "lack of collision".
+      /// Values within the dimensions of <see cref="CGE.Physics.physicsLayersInteractions"/> correlate to those physics layers.
+      /// 
+      /// Instead of using numbers, it's useful to use an enum type to represent your physics layers.
       /// </summary>
       public int[,] CollisionMask { get; init; } //dont animate this, one frame could be fine, but then another frame's collision data could cause this object to be suddenly clipping in another object.
       public Sprite BackingSprite { get; init; }
@@ -89,6 +83,7 @@ namespace ConsoleGameEngine
                if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
                   ParentWindow.IsDirty |= true;
                left = value;
+               CGE.Physics.RaiseMoveEvent(this);
             }
          }
       }
@@ -106,6 +101,7 @@ namespace ConsoleGameEngine
                if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
                   ParentWindow.IsDirty |= true;
                top = value;
+               CGE.Physics.RaiseMoveEvent(this);
             }
          }
       }

@@ -8,8 +8,7 @@ namespace ForestForay
    {
       static void Main(string[] args)
       {
-         ConsoleUtil.Initialize();
-
+         CGE.Initialize();
          ConsoleWindow mainCw = new(80, 25);
          mainCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode | ConsoleWindow.WindowDrawType.WindowMode | ConsoleWindow.WindowDrawType.RawMode;
 
@@ -18,8 +17,7 @@ namespace ForestForay
          subCw.Left = 3; subCw.Top = 4;
          mainCw.ChildConsoleWindows.Add(subCw);
          
-         Renderer rend = new Renderer();
-         rend.SetRootConsoleWindow(mainCw);
+         CGE.Renderer.SetRootConsoleWindow(mainCw);
 
          Entity tree = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Tree] };
          mainCw.Entities.Add(tree);
@@ -31,7 +29,7 @@ namespace ForestForay
          
          while (true)
          {
-            rend.Draw();
+            CGE.Renderer.Draw();
             bool esc = false;
             while (Console.KeyAvailable)
             {
