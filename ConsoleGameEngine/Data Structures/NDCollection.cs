@@ -8,12 +8,15 @@ namespace ConsoleGameEngine.DataStructures
 {
    public class NDCollection<T>
    {
-      //TODO: n-dimension read only collection.?
+      /// <summary>
+      /// Params: indeces, oldValue, newvalue
+      /// </summary>
+      public event Action<int[], T, T> OnContentsChanged;
       private T[] flatData;
       private int[] lengths;
-      //public bool Locked { get; private set; } = false;
-      public NDCollection(IEnumerable<T> flattenedData, params int[] lengths) : this(flattenedData.ToList(), lengths) { }
-      public NDCollection(IReadOnlyList<T> flattenedData, params int[] lengths) 
+      public NDCollection(params int[] lengths) : this(Enumerable.Repeat(default(T), lengths.Aggregate(1, (a, b) => a * b)), lengths) { }
+      public NDCollection(IReadOnlyList<T> flattenedData, params int[] lengths) : this(flattenedData.AsEnumerable(), lengths) { }
+      public NDCollection(IEnumerable<T> flattenedData, params int[] lengths)
       {
          flatData = flattenedData.ToArray();
          this.lengths = lengths;
@@ -23,10 +26,14 @@ namespace ConsoleGameEngine.DataStructures
          get => flatData[FlattenIndex(indeces)];
          set
          {
-            //if (!Locked)
-               flatData[FlattenIndex(indeces)] = value;
-            //else
-            //   throw new InvalidOperationException("Tried to modify a locked NDLockableCollection.");
+            if (!flatData[FlattenIndex(indeces)].Equals(value))
+            {
+               int flat = FlattenIndex(indeces);
+               T oldv = flatData[flat];
+               T newv = value;
+               flatData[flat] = value;
+               OnContentsChanged?.Invoke(indeces, oldv, newv);
+            }
          }
       }
       //generalization of
@@ -45,6 +52,5 @@ namespace ConsoleGameEngine.DataStructures
       }
       public int GetLength(int dimension) => lengths[dimension];
       public int DimensionCount() => lengths.Length;
-      //public void Lock() => Locked = true;
    }
 }

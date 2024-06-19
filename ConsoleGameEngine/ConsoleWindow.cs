@@ -2,6 +2,9 @@
 using ConsoleGameEngine.old;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,11 +25,87 @@ namespace ConsoleGameEngine
          Disabled = 0,
          EntityMode = 1,
          WindowMode = 2,
-         MenuMode = 4,
-         TextMode = 8, //"raw" control
+         //MenuMode = 4,
+         RawMode = 8, //"raw" control
       }
       #endregion
 
+      #region Fields
+      #region Parent Window Stuff
+      private int left;
+      /// <summary>
+      /// How many columns to the right is this window relative to the left edge of the parent window.
+      /// </summary>
+      public int Left 
+      { 
+         get => left;
+         set
+         {
+            if (left != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.WindowMode) != WindowDrawType.Disabled) 
+                  ParentWindow.IsDirty |= true;
+               left = value;
+            }
+         }
+      }
+      private int top;
+      /// <summary>
+      /// How many rows to the bottom is this window relative to the top edge of the parent window.
+      /// </summary>
+      public int Top 
+      {
+         get => top;
+         set
+         {
+            if (top != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.WindowMode) != WindowDrawType.Disabled)
+                  ParentWindow.IsDirty |= true;
+               top = value;
+            }
+         }
+      }
+      private int zOrder;
+      /// <summary>
+      /// What order this drawable element is drawn in. High values get drawn on top, low values on bottom.
+      /// </summary>
+      public int ZOrder 
+      {
+         get => zOrder;
+         set
+         {
+            if (zOrder != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.WindowMode) != WindowDrawType.Disabled)
+                  ParentWindow.IsDirty |= true;
+               zOrder = value;
+            }
+         }
+      }
+      #endregion
+
+      #region EntityStuff
+      public ObservableCollection<Entity> Entities { get; } = new ObservableCollection<Entity>(); //when add/remove set this window dirty if WindowDrawType is EntityMode
+      #endregion
+
+      #region Child Window Stuff
+      /// <summary>
+      /// All child console windows are implicitly drawn on top of this one. ZOrder is only compared between children to determine draw order.
+      /// </summary>
+      public ObservableCollection<ConsoleWindow> ChildConsoleWindows { get; } = new ObservableCollection<ConsoleWindow>(); //when add/remove set this window dirty if WindowDrawType is WindowMode
+      #endregion
+
+      #region TextMode
+      public NDCollection<char> RawChars { get; }
+      public NDCollection<int> RawColorCodes { get; }
+      public NDCollection<bool> RawDisplayMask { get; }
+      //TODO: ObservableDictionary
+      public Dictionary<int, string> RawColorCodesLookup { get; } //when modify set this window dirty if WindowDrawType is textmode
+      #endregion
+
+      #region General
+      private WindowDrawType drawType;
       /// <summary>
       /// Flag field for what elements this window should display.
       /// 
@@ -34,33 +113,39 @@ namespace ConsoleGameEngine
       /// 
       /// Note: TextMode content will always be drawn on top.
       /// </summary>
-      public WindowDrawType DrawType { get; set; } //when change drawmode, set this window dirty
-      /// <summary>
-      /// How many columns to the right is this window relative to the left edge of the parent window.
-      /// </summary>
-      public int Left { get; set; } //set parent window dirty
-      /// <summary>
-      /// How many rows to the bottom is this window relative to the top edge of the parent window.
-      /// </summary>
-      public int Top { get; set; } //set parent window dirty
-      /// <summary>
-      /// What order this drawable element is drawn in. High values get drawn on top, low values on bottom.
-      /// </summary>
-      public int ZOrder { get; set; } //set parent window dirty
+      public WindowDrawType DrawType
+      {
+         get => drawType;
+         set
+         {
+            if (drawType != value)
+            {
+               IsDirty |= true;
+               drawType = value;
+            }
+         }
+      }
+      private bool isDirty = true;
+      public bool IsDirty 
+      {
+         get => isDirty;
+         set
+         {
+            if (value)
+            {
+               if (ParentWindow != null)
+                  ParentWindow.IsDirty = true;
+            }
+            isDirty = value;
+         }
+      }
       public int Width { get; }
       public int Height { get; }
-      public List<Entity> Entities { get; } = new List<Entity>(); //when add/remove set this window dirty if WindowDrawType is EntityMode
-      /// <summary>
-      /// All child console windows are implicitly drawn on top of this one. ZOrder is only compared between children to determine draw order.
-      /// </summary>
-      public List<ConsoleWindow> ChildConsoleWindows { get; } = new List<ConsoleWindow>(); //when add/remove set this window dirty if WindowDrawType is WindowMode
-      public NDCollection<char> RawChars { get; init; } //when modify set this window dirty if WindowDrawType is textmode
-      public NDCollection<int> RawColorCodes { get; init; } //when modify set this window dirty if WindowDrawType is textmode
-      public NDCollection<bool> RawDisplayMask { get; init; } //when modify set this window dirty if WindowDrawType is textmode
-      public Dictionary<int, string> RawColorCodesLookup { get; init; } //when modify set this window dirty if WindowDrawType is textmode
-      public bool IsDirty { get; set; } = true;
-
+      public ConsoleWindow ParentWindow { get; private set; } = null;
       private FrameInfo lastFrameInfo = null;
+      #endregion
+      #endregion
+
       /// <summary>
       /// Creates a ConsoleWindow with the specified width and height.
       /// 
@@ -72,6 +157,103 @@ namespace ConsoleGameEngine
       {
          Width = width;
          Height = height;
+         RawChars = new NDCollection<char>(Enumerable.Repeat(' ', width * height), width, height);
+         RawColorCodes = new NDCollection<int>(width, height);
+         RawDisplayMask = new NDCollection<bool>(width, height);
+         RawColorCodesLookup = new Dictionary<int, string>()
+         { { 0, ConsoleUtil.GetColorANSIPrefix(255, 255, 255) } };
+         void OnNDCollectionModify<T>(int[] indeces, T oldv, T newv)
+         {
+            if (!oldv.Equals(newv) && (DrawType & WindowDrawType.RawMode) != WindowDrawType.Disabled)
+               IsDirty = true;
+         }
+         RawChars.OnContentsChanged += OnNDCollectionModify<char>;
+         RawColorCodes.OnContentsChanged += OnNDCollectionModify<int>;
+         RawDisplayMask.OnContentsChanged += OnNDCollectionModify<bool>;
+         Entities.CollectionChanged += (obj, args) =>
+         {
+            switch (args.Action)
+            {
+               case NotifyCollectionChangedAction.Add:
+                  foreach (Entity item in args.NewItems)
+                  {
+                     if (item.ParentWindow != null)
+                        throw new Exception("Error: ConsoleWindow was assigned to be a child of another ConsoleWindow, but it already was a child of a ConsoleWindow. Remove it as a child from the other ConsoleWindow before adding it to this one!");
+                     item.ParentWindow = this;
+                  }
+                  break;
+               case NotifyCollectionChangedAction.Reset: // I think this is just .Clear()
+               case NotifyCollectionChangedAction.Remove:
+                  foreach (Entity item in args.NewItems)
+                  {
+                     if (item.ParentWindow == null)
+                        throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had an internal null parent!");
+                     else if (item.ParentWindow != this)
+                        throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had a different internal parent!");
+                     item.ParentWindow = null;
+                  }
+                  break;
+               case NotifyCollectionChangedAction.Replace: //when: coll[5] = newObj;
+                  if (!(args.OldItems.Count == 1 && args.NewItems.Count == 1))
+                     throw new NotImplementedException("Error: What function did you even call to cause this exception?");
+                  Entity oldw = (args.OldItems[0] as Entity), neww = (args.NewItems[0] as Entity);
+                  if (oldw.ParentWindow == null)
+                     throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had an internal null parent!");
+                  else if (oldw.ParentWindow != this)
+                     throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had a different internal parent!");
+                  oldw.ParentWindow = null;
+                  if (neww.ParentWindow != null)
+                     throw new Exception("Error: ConsoleWindow was assigned to be a child of another ConsoleWindow, but it already was a child of a ConsoleWindow. Remove it as a child from the other ConsoleWindow before adding it to this one!");
+                  neww.ParentWindow = this;
+                  break;
+               case NotifyCollectionChangedAction.Move:
+                  break; //shouldn't need to do anything hypothetically
+               default:
+                  throw new NotImplementedException("Unrecognized ObservableCollection event");
+            }
+         };
+         ChildConsoleWindows.CollectionChanged += (obj, args) =>
+         {
+            switch (args.Action)
+            {
+               case NotifyCollectionChangedAction.Add:
+                  foreach (ConsoleWindow item in args.NewItems)
+                  {
+                     if (item.ParentWindow != null)
+                        throw new Exception("Error: ConsoleWindow was assigned to be a child of another ConsoleWindow, but it already was a child of a ConsoleWindow. Remove it as a child from the other ConsoleWindow before adding it to this one!");
+                     item.ParentWindow = this;
+                  }
+                  break;
+               case NotifyCollectionChangedAction.Reset: // I think this is just .Clear()
+               case NotifyCollectionChangedAction.Remove:
+                  foreach (ConsoleWindow item in args.NewItems)
+                  {
+                     if (item.ParentWindow == null)
+                        throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had an internal null parent!");
+                     else if (item.ParentWindow != this)
+                        throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had a different internal parent!");
+                     item.ParentWindow = null;
+                  }
+                  break;
+               case NotifyCollectionChangedAction.Replace: //when: coll[5] = newObj;
+                  if (!(args.OldItems.Count == 1 && args.NewItems.Count == 1))
+                     throw new NotImplementedException("Error: What function did you even call to cause this exception?");
+                  ConsoleWindow oldw = (args.OldItems[0] as ConsoleWindow), neww = (args.NewItems[0] as ConsoleWindow);
+                  if (oldw.ParentWindow == null)
+                     throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had an internal null parent!");
+                  else if (oldw.ParentWindow != this)
+                     throw new Exception("Error: a ConsoleWindow was removed as a child of this ConsoleWindow, but for some reason it had a different internal parent!");
+                  oldw.ParentWindow = null;
+                  if (neww.ParentWindow != null)
+                     throw new Exception("Error: ConsoleWindow was assigned to be a child of another ConsoleWindow, but it already was a child of a ConsoleWindow. Remove it as a child from the other ConsoleWindow before adding it to this one!");
+                  neww.ParentWindow = this;
+                  break;
+               case NotifyCollectionChangedAction.Move:
+                  break; //shouldn't need to do anything hypothetically
+               default:
+                  throw new NotImplementedException("Unrecognized ObservableCollection event");
+            }
+         };
       }
 
       public FrameInfo Draw()
@@ -82,12 +264,11 @@ namespace ConsoleGameEngine
          char[,] chars = new char[Height, Width];
          for (int i = 0; i < chars.GetLength(0); i++)
             for (int j = 0; j < chars.GetLength(1); j++)
-               chars[i, j] = ' ';
+               chars[i, j] = ' '; //replace nulls with space
          int[,] colorCodes = new int[Height, Width];
-         //HashSet<int> takenColorCodesLookupKeys = new HashSet<int>() { 0 };
          Dictionary<int, string> colorCodesLookup = new Dictionary<int, string>()
          { { 0, ConsoleUtil.GetColorANSIPrefix(255, 255, 255) } };
-         //our sprites
+         //entity mode
          if ((DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
          {
             foreach (Entity e in Entities.OrderBy(x => x.ZOrder)) //small to big, so that big gets rendered last
@@ -180,24 +361,44 @@ namespace ConsoleGameEngine
                }
             }
          }
-         //menu entries mode
-         if ((DrawType & WindowDrawType.MenuMode) != WindowDrawType.Disabled)
+         //raw text mode
+         if ((DrawType & WindowDrawType.RawMode) != WindowDrawType.Disabled)
          {
-            //todo
-            //maybe instead of menumode, we can just make some helper functions to make making menus in text mode easy.
-         }
-         //our text
-         if ((DrawType & WindowDrawType.TextMode) != WindowDrawType.Disabled)
-         {
-
+            int newKey = colorCodesLookup.Count;
+            //key: old color code, value: new color code
+            Dictionary<int, int> colorCodesRemappings = new();
+            foreach (KeyValuePair<int, string> lookup in RawColorCodesLookup)
+            {
+               colorCodesRemappings.Add(lookup.Key, newKey);
+               colorCodesLookup.Add(newKey, lookup.Value);
+               newKey++;
+            }
+            for (int x = 0; x < Width; x++)
+            {
+               for (int y = 0; y < Height; y++)
+               {
+                  if (RawDisplayMask[x, y])
+                  {
+                     chars[y, x] = RawChars[x, y];
+                     colorCodes[y, x] = colorCodesRemappings[RawColorCodes[x, y]];
+                  }
+               }
+            }
          }
          IsDirty = false;
-         return lastFrameInfo = new FrameInfo() 
+         lastFrameInfo = new FrameInfo()
          {
             Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
-            Meta = $"cull: {cullCount}"
+            //Meta = $"cull: {cullCount} d: {false}"
+         };
+         return new FrameInfo()
+         {
+            Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
+            ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
+            ColorCodesLookup = colorCodesLookup,
+            //Meta = $"cull: {cullCount} d: {true}"
          };
       }
    }

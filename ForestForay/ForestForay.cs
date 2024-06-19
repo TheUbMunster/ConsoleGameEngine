@@ -11,7 +11,7 @@ namespace ForestForay
          ConsoleUtil.Initialize();
 
          ConsoleWindow mainCw = new(80, 25);
-         mainCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode | ConsoleWindow.WindowDrawType.WindowMode;
+         mainCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode | ConsoleWindow.WindowDrawType.WindowMode | ConsoleWindow.WindowDrawType.RawMode;
 
          ConsoleWindow subCw = new ConsoleWindow(12, 5);
          subCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode;
@@ -73,6 +73,13 @@ namespace ForestForay
                   case ConsoleKey.RightArrow:
                      player.Left++;
                      subCw.IsDirty = true;
+                     break;
+
+                  case ConsoleKey.Spacebar:
+                     mainCw.RawColorCodesLookup[1] = ConsoleUtil.GetColorANSIPrefix(220, 20, 220);
+                     mainCw.RawColorCodes[0, 0] = 1;
+                     mainCw.RawChars[0, 0] = 'F';
+                     mainCw.RawDisplayMask[0, 0] = true;
                      break;
 
                   case ConsoleKey.Escape:

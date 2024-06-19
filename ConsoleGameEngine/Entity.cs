@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ConsoleGameEngine.ConsoleWindow;
 
 namespace ConsoleGameEngine
 {
@@ -17,6 +18,10 @@ namespace ConsoleGameEngine
       /// </summary>
       public static bool[,] physicsLayersInteractions = new bool[13, 13]; //n x n
       public static event Action<Entity, Entity> OnCollision;
+
+
+
+
       private long lastAnimationUpdateTime = 0L;
       /// <summary>
       /// Animation frames will increment every <see cref="AnimationRate"/> seconds. If null, the animation is paused.
@@ -53,18 +58,58 @@ namespace ConsoleGameEngine
       /// </summary>
       public int[,]? CollisionMask { get; init; } //dont animate this, one frame could be fine, but then another frame's collision data could cause this object to be suddenly clipping in another object.
       public Sprite BackingSprite { get; init; }
+      private int left;
       /// <summary>
       /// How many columns to the right is this window relative to the left edge of the parent window.
       /// </summary>
-      public int Left { get; set; } //set parent window dirty
+      public int Left 
+      {
+         get => left;
+         set
+         {
+            if (left != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
+                  ParentWindow.IsDirty |= true;
+               left = value;
+            }
+         }
+      }
+      private int top;
       /// <summary>
       /// How many rows to the bottom is this window relative to the top edge of the parent window.
       /// </summary>
-      public int Top { get; set; } //set parent window dirty
+      public int Top 
+      {
+         get => top;
+         set
+         {
+            if (top != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
+                  ParentWindow.IsDirty |= true;
+               top = value;
+            }
+         }
+      }
+      private int zOrder;
       /// <summary>
       /// What order this drawable element is drawn in. High values get drawn on top, low values on bottom.
       /// </summary>
-      public int ZOrder { get; set; } //set parent window dirty
+      public int ZOrder 
+      {
+         get => zOrder;
+         set
+         {
+            if (zOrder != value)
+            {
+               if (ParentWindow != null && (ParentWindow.DrawType & WindowDrawType.EntityMode) != WindowDrawType.Disabled)
+                  ParentWindow.IsDirty |= true;
+               zOrder = value;
+            }
+         }
+      }
+      public ConsoleWindow ParentWindow { get; internal set; }
       public Entity() { } //todo: ctor verify drawabledata matches collisionmask dimension
    }
 }
