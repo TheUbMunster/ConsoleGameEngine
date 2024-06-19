@@ -23,7 +23,7 @@ namespace ForestForay
 
          Entity tree = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Tree] };
          mainCw.Entities.Add(tree);
-         Entity shrub = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Shrub], Left = 10 };
+         Entity shrub = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Shrub], Left = 10, AnimationRate = 1f };
          mainCw.Entities.Add(shrub);
 
          Entity player = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Player] };

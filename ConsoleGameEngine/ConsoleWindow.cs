@@ -1,6 +1,5 @@
 ﻿using ConsoleGameEngine.Data_Structures;
 using ConsoleGameEngine.DataStructures;
-using ConsoleGameEngine.old;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -140,6 +139,7 @@ namespace ConsoleGameEngine
             isDirty = value;
          }
       }
+      //internal int SubmemberAnimatedCount { get; set; } //also would need to add/subtract whenever an entity is added this this consolewindow's collection.
       public int Width { get; }
       public int Height { get; }
       public ConsoleWindow ParentWindow { get; private set; } = null;
@@ -279,7 +279,7 @@ namespace ConsoleGameEngine
 
       public FrameInfo Draw()
       {
-         if (!IsDirty && lastFrameInfo != null)
+         if (!IsDirty && lastFrameInfo != null/* && SubmemberAnimatedCount == 0*/)
             return lastFrameInfo;
          int cullCount = 0;
          char[,] chars = new char[Height, Width];

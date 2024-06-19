@@ -22,41 +22,58 @@ namespace ConsoleGameEngine
 
 
 
-      private long lastAnimationUpdateTime = 0L;
+      private long ctorTime = DateTime.Now.Ticks;
+      private int animationFrameOffset = 0;
+      private float? animationRate = null;
       /// <summary>
       /// Animation frames will increment every <see cref="AnimationRate"/> seconds. If null, the animation is paused.
       /// </summary>
-      public float? AnimationRate { get; set; } = null;
-      private int animationFrameIndex = 0;
+      public float? AnimationRate 
+      {
+         get => animationRate;
+         set
+         {
+            //if (value == null && animationRate != null)
+            //{
+            //   animationRate = value;
+            //   ParentWindow.SubmemberAnimatedCount--;
+            //}
+            //else if (value != null && animationRate == null)
+            //{
+            //   animationRate = value;
+            //   ParentWindow.SubmemberAnimatedCount++;
+            //}
+            //else if (value != null && animationRate != null && animationRate != value)
+               animationRate = value; //this is already in submemberanimatedcount
+         }
+      }
+      //private int animationFrameIndex = 0;
       public int AnimationFrameIndex //when changed via time or manually set parent window dirty
       {
          get
          {
+            int timeVal = 0;
             if (AnimationRate.HasValue)
             {
-               //todo: calculate what the new animationFrameIndex is
-               //update the lastAnimationUpdateTime
-               //but do so in a way where any remainder between the current frame and the next one gets added
-
-               //long newTime = DateTime.Now.Ticks;
-               ////timespan since we last checked AnimationFrameIndex
-               //float deltaSeconds = (newTime - lastAnimationUpdateTime) / ((float)TimeSpan.TicksPerSecond);
-               ////how many frames should have passed in that time.
-               //float inc = deltaSeconds / AnimationRate.Value;
-
-               //animationFrameIndex += inc;
-               //if (inc != 0)
-               //   lastAnimationUpdateTime = newTime;
+               if (AnimationRate != null)
+               {
+                  timeVal = (int)(((DateTime.Now.Ticks - ctorTime) / TimeSpan.TicksPerSecond) / AnimationRate.Value);
+               }
             }
-            return animationFrameIndex;
+            return (timeVal + animationFrameOffset) % BackingSprite.Frames;
          }
-         set => animationFrameIndex = (value % BackingSprite.Chars.Count);
+         set
+         {
+            int cur = AnimationFrameIndex;
+            animationFrameOffset = Math.Abs(cur - value);
+            //animationFrameIndex = (value % BackingSprite.Chars.Count);
+         }
       }
       /// <summary>
       /// Note that not all of the collision mask must belong to the same physics layer. Some of it may belong
       /// to a solid collision layer, while another portion of it may be a "trigger" physics layer to (e.g., open a door).
       /// </summary>
-      public int[,]? CollisionMask { get; init; } //dont animate this, one frame could be fine, but then another frame's collision data could cause this object to be suddenly clipping in another object.
+      public int[,] CollisionMask { get; init; } //dont animate this, one frame could be fine, but then another frame's collision data could cause this object to be suddenly clipping in another object.
       public Sprite BackingSprite { get; init; }
       private int left;
       /// <summary>

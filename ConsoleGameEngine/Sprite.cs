@@ -23,6 +23,10 @@ namespace ConsoleGameEngine
       public IReadOnlyList<NDCollection<int>> ColorCodes { get; init; }
       public IReadOnlyList<NDCollection<bool>> DisplayMask { get; init; } //if any value is false, that "pixel" is treated like it's transparent.
       public IReadOnlyDictionary<int, string> ColorCodesLookup { get; init; }
+      /// <summary>
+      /// How many frames exist in the <see cref="Chars"/>, <see cref="ColorCodes"/>, <see cref="DisplayMask"/> for animation.
+      /// </summary>
+      public int Frames { get => Chars.Count; }
       public int Width { get => Chars[0].GetLength(0); }
       public int Height { get => Chars[0].GetLength(1); }
       #endregion
