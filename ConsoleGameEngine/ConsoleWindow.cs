@@ -1,4 +1,5 @@
-﻿using ConsoleGameEngine.DataStructures;
+﻿using ConsoleGameEngine.Data_Structures;
+using ConsoleGameEngine.DataStructures;
 using ConsoleGameEngine.old;
 using System;
 using System.Collections.Generic;
@@ -101,7 +102,7 @@ namespace ConsoleGameEngine
       public NDCollection<int> RawColorCodes { get; }
       public NDCollection<bool> RawDisplayMask { get; }
       //TODO: ObservableDictionary
-      public Dictionary<int, string> RawColorCodesLookup { get; } //when modify set this window dirty if WindowDrawType is textmode
+      public ObservableDictionary<int, string> RawColorCodesLookup { get; } //when modify set this window dirty if WindowDrawType is textmode
       #endregion
 
       #region General
@@ -160,7 +161,7 @@ namespace ConsoleGameEngine
          RawChars = new NDCollection<char>(Enumerable.Repeat(' ', width * height), width, height);
          RawColorCodes = new NDCollection<int>(width, height);
          RawDisplayMask = new NDCollection<bool>(width, height);
-         RawColorCodesLookup = new Dictionary<int, string>()
+         RawColorCodesLookup = new ObservableDictionary<int, string>()
          { { 0, ConsoleUtil.GetColorANSIPrefix(255, 255, 255) } };
          void OnNDCollectionModify<T>(int[] indeces, T oldv, T newv)
          {
@@ -170,6 +171,26 @@ namespace ConsoleGameEngine
          RawChars.OnContentsChanged += OnNDCollectionModify<char>;
          RawColorCodes.OnContentsChanged += OnNDCollectionModify<int>;
          RawDisplayMask.OnContentsChanged += OnNDCollectionModify<bool>;
+         RawColorCodesLookup.CollectionChanged += (obj, args) =>
+         {
+            switch (args.Action)
+            {
+               case NotifyCollectionChangedAction.Add:
+               case NotifyCollectionChangedAction.Remove:
+               case NotifyCollectionChangedAction.Reset:
+                  if ((DrawType & WindowDrawType.RawMode) != WindowDrawType.Disabled)
+                     IsDirty = true;
+                  break;
+               case NotifyCollectionChangedAction.Replace:
+                  if (!args.OldItems[0].Equals(args.NewItems[0]) && (DrawType & WindowDrawType.RawMode) != WindowDrawType.Disabled)
+                     IsDirty = true;
+                  break;
+               case NotifyCollectionChangedAction.Move: //do nothing?
+                  break;
+               default:
+                  throw new NotImplementedException("Unrecognized ObservableDictionary event");
+            }
+         };
          Entities.CollectionChanged += (obj, args) =>
          {
             switch (args.Action)
@@ -391,14 +412,14 @@ namespace ConsoleGameEngine
             Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
-            //Meta = $"cull: {cullCount} d: {false}"
+            Meta = $"cull: {cullCount} d: {false}" //*need* to fix this not updating or else the meta feature won't work
          };
          return new FrameInfo()
          {
             Chars = new NDCollection<char>(chars.Cast<char>(), Width, Height),
             ColorCodes = new NDCollection<int>(colorCodes.Cast<int>(), Width, Height),
             ColorCodesLookup = colorCodesLookup,
-            //Meta = $"cull: {cullCount} d: {true}"
+            Meta = $"cull: {cullCount} d: {true}"
          };
       }
    }
