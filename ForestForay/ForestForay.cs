@@ -1,6 +1,6 @@
 ﻿using System;
-using ConsoleGameEngine;
 using System.Threading;
+using ConsoleGameEngine;
 
 namespace ForestForay
 {
@@ -9,75 +9,87 @@ namespace ForestForay
       static void Main(string[] args)
       {
          CGE.Initialize();
+         ConsoleWindow mainCw = new(80, 25);
+         mainCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode | ConsoleWindow.WindowDrawType.WindowMode | ConsoleWindow.WindowDrawType.RawMode;
 
-         ScreenBuffer sb = new(6, 8, 50, 20);
-         Entity e1 = new Entity(Entity.EntityType.PineTree, ' ');
-         e1.Left = e1.Width;
-         Entity e2= new Entity(Entity.EntityType.Brush, ' ');
-         e2.Top = e2.Height * 2;
-         Entity e3 = new Entity(Entity.EntityType.Player, ' ');
-         sb.AddEntity(e1);
-         sb.AddEntity(e2);
-         sb.AddEntity(e3);
-         sb.Draw(true);
-         MoveTreeRoutine(e3);
-      }
+         ConsoleWindow subCw = new ConsoleWindow(12, 5);
+         subCw.DrawType |= ConsoleWindow.WindowDrawType.EntityMode;
+         subCw.Left = 3; subCw.Top = 4;
+         mainCw.ChildConsoleWindows.Add(subCw);
+         
+         CGE.Renderer.SetRootConsoleWindow(mainCw);
 
-      static void MoveTreeRoutine(Entity e)
-      {
+         Entity tree = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Tree] };
+         mainCw.Entities.Add(tree);
+         Entity shrub = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Shrub], Left = 10, AnimationRate = 1f };
+         mainCw.Entities.Add(shrub);
+
+         Entity player = new Entity() { BackingSprite = Sprite.PersistentSpriteTemplates[SpriteFactory.Player] };
+         subCw.Entities.Add(player);
+         
          while (true)
          {
+            CGE.Renderer.Draw();
             bool esc = false;
-            if (Console.KeyAvailable)
+            while (Console.KeyAvailable)
             {
-               switch(Console.ReadKey(true).Key)
+               switch (Console.ReadKey(true).Key)
                {
                   case ConsoleKey.W:
-                     e.MyBuffer.Top--;
-                     e.MyBuffer.Redraw(true);
+                     tree.Top--;
+                     shrub.Top--;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.S:
-                     e.MyBuffer.Top++;
-                     e.MyBuffer.Redraw(true);
+                     tree.Top++;
+                     shrub.Top++;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.A:
-                     e.MyBuffer.Left--;
-                     e.MyBuffer.Redraw(true);
+                     tree.Left--;
+                     shrub.Left--;
+                     mainCw.IsDirty = true;
                      break;
                   case ConsoleKey.D:
-                     e.MyBuffer.Left++;
-                     e.MyBuffer.Redraw(true);
+                     tree.Left++;
+                     shrub.Left++;
+                     mainCw.IsDirty = true;
                      break;
+
                   case ConsoleKey.UpArrow:
-                     e.Top--;
-                     e.Draw();
+                     player.Top--;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.DownArrow:
-                     e.Top++;
-                     e.Draw();
+                     player.Top++;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.LeftArrow:
-                     e.Left--;
-                     e.Draw();
+                     player.Left--;
+                     subCw.IsDirty = true;
                      break;
                   case ConsoleKey.RightArrow:
-                     e.Left++;
-                     e.Draw();
+                     player.Left++;
+                     subCw.IsDirty = true;
                      break;
+
+                  case ConsoleKey.Spacebar:
+                     mainCw.RawColorCodesLookup[1] = ConsoleUtil.GetColorANSIPrefix(220, 20, 220);
+                     mainCw.RawColorCodes[0, 0] = 1;
+                     mainCw.RawChars[0, 0] = 'F';
+                     mainCw.RawDisplayMask[0, 0] = true;
+                     break;
+
                   case ConsoleKey.Escape:
                      esc = true;
                      break;
-               }
-               while(Console.KeyAvailable)
-               {
-                  Console.ReadKey(true); //consume additional characters.
                }
             }
             if (esc)
             {
                break;
             }
-            Thread.Sleep(100);
+            Thread.Sleep(50);
          }
       }
    }
